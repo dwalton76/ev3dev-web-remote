@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
 
-import http.server
-import http.server
-import socketserver
-import subprocess
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from keyboard import Keyboard
+from socketserver import ThreadingMixIn
+from subprocess import call, STDOUT
 
 KEYBOARD = Keyboard()
 SERVER_PORT = 8080
 
 
-class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """
     Handle requests in a separate thread
     """
     daemon_threads = True
 
 
-class MyHandler(http.server.SimpleHTTPRequestHandler):
+class MyHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         """
@@ -26,10 +25,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
 
         if ".png" in self.path:
             self.send_response(200)
-            self.send_header('Content-Type', 'multipart/x-mixed-replace;boundary=boundarydonotcross')
-            self.end_headers()
-
-            subprocess.call(["/usr/bin/fbgrab", "-d", "/dev/fb0", "framebuffer.png"], stderr=subprocess.STDOUT)
+            call(["/usr/bin/fbgrab", "-d", "/dev/fb0", "framebuffer.png"], stderr=STDOUT)
             self.send_header('Content-type', 'image/png')
             self.end_headers()
 
@@ -37,21 +33,21 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(fh.read())
 
         else:
-            f = self.send_head()
-            if f:
-                try:
-                    self.copyfile(f, self.wfile)
-                finally:
-                    f.close()
+            with self.send_head() as fh:
+                self.copyfile(fh, self.wfile)
 
     def do_POST(self):
 
         if self.path.endswith('key'):
-            self.send_response(200)
             content_len = int(self.headers.get('content-length', 0))
             content = self.rfile.read(content_len).decode('ascii')
             jskc, state = content.split(',')
             KEYBOARD.send_key(int(jskc), int(state))
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write('{}'.encode('ascii'))
 
 
 if __name__ == '__main__':
