@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import BaseHTTPServer
-import SimpleHTTPServer
-import SocketServer
+import http.server
+import http.server
+import socketserver
 import subprocess
 from keyboard import Keyboard
 
@@ -10,14 +10,14 @@ KEYBOARD = Keyboard()
 SERVER_PORT = 8080
 
 
-class ThreadedHTTPServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
+class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     """
     Handle requests in a separate thread
     """
     daemon_threads = True
 
 
-class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class MyHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         """
@@ -48,8 +48,8 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         if self.path.endswith('key'):
             self.send_response(200)
-            content_len = int(self.headers.getheader('content-length', 0))
-            content = self.rfile.read(content_len)
+            content_len = int(self.headers.get('content-length', 0))
+            content = self.rfile.read(content_len).decode('ascii')
             jskc, state = content.split(',')
             KEYBOARD.send_key(int(jskc), int(state))
 
