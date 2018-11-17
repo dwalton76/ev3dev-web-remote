@@ -8,6 +8,23 @@ $(document).bind(
     }
 );
 
+function keydown(keyCode) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/send.key', true);
+    xhr.send(keyCode + ',1');
+}
+
+function keyup(keyCode) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/send.key', true);
+    xhr.send(keyCode + ',0');
+
+
+    // Refresh the screen on keyup
+    d = new Date();
+    $("#brick img").attr("src", "/framebuffer.png?"+d.getTime());
+}
+
 
 $(document).ready(function() {
 
@@ -16,9 +33,7 @@ $(document).ready(function() {
         e.preventDefault();
 
         if (!e.repeat) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/send.key', true);
-            xhr.send(e.keyCode + ',1');
+            keydown(e.keyCode);
         }
     });
 
@@ -27,12 +42,49 @@ $(document).ready(function() {
         e.preventDefault();
 
         if (!e.repeat) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/send.key', true);
-            xhr.send(e.keyCode + ',0');
+            keyup(e.keyCode);
         }
+    });
 
-        d = new Date();
-        $("#brick img").attr("src", "/framebuffer.png?"+d.getTime());
+    // BACKSPACE is 8
+    // UP is 38
+    // LEFT is 37
+    // ENTER is 13
+    // RIGHT is 39
+    // DOWN is 40
+    $("#back").click(function() {
+        console.log("back clicked")
+        keydown(8);
+        keyup(8);
+    });
+
+    $("#up").click(function() {
+        console.log("on clicked")
+        keydown(38);
+        keyup(38);
+    });
+
+    $("#left").click(function() {
+        console.log("left clicked")
+        keydown(37);
+        keyup(37);
+    });
+
+    $("#enter").click(function() {
+        console.log("enter clicked")
+        keydown(13);
+        keyup(13);
+    });
+
+    $("#right").click(function() {
+        console.log("right clicked")
+        keydown(39);
+        keyup(39);
+    });
+
+    $("#down").click(function() {
+        console.log("down clicked")
+        keydown(40);
+        keyup(40);
     });
 });

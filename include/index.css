@@ -1,14 +1,22 @@
 html, body {
-    width: 100%; height: 100%;
-    margin: 0; padding: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
     background-color: #333;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 #brick {
-    width: 350px; height: 550px;
+    width: 350px;
+    height: 550px;
 
     position: absolute;
-    top: 50%; left: 50%;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
 
     background-image: url('/include/ev3.svg');
@@ -17,7 +25,57 @@ html, body {
 }
 
 #brick img {
-    position: relative;
+    position: absolute;
     top: 60px;
     left: 86px; /* (350-178)/2 */
+}
+
+#back {
+    width: 78px;
+    height: 37px;
+    position: absolute;
+    top: 257px;
+    left: 40px;
+}
+
+#up {
+    width: 101px;
+    height: 45px;
+    position: absolute;
+    top: 281px;
+    left: 125px;
+    float: left;
+}
+
+#left {
+    width: 53px;
+    height: 39px;
+    position: absolute;
+    top: 333px;
+    left: 78px;
+}
+
+#enter {
+    width: 39px;
+    height: 39px;
+    position: absolute;
+    top: 333px;
+    left: 156px;
+}
+
+#right {
+    width: 53px;
+    height: 39px;
+    position: absolute;
+    top: 333px;
+    left: 220px;
+}
+
+#down {
+    width: 101px;
+    height: 45px;
+    position: absolute;
+    top: 378px;
+    left: 125px;
+    float: left;
 }

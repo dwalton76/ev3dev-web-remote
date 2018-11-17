@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+import os
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from keyboard import Keyboard
 from socketserver import ThreadingMixIn
 from subprocess import call, STDOUT
+from time import sleep
 
 KEYBOARD = Keyboard()
 SERVER_PORT = 8080
@@ -39,10 +41,26 @@ class MyHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
 
         if self.path.endswith('key'):
+
             content_len = int(self.headers.get('content-length', 0))
             content = self.rfile.read(content_len).decode('ascii')
             jskc, state = content.split(',')
+
+            # key down: note the timestamp of when the framebuffer was last modified
+            if state:
+                self.pre_key_down_mtime = os.path.getmtime("/dev/fb0")
+
             KEYBOARD.send_key(int(jskc), int(state))
+
+            # key up: when the user presses down on a key that will cause the
+            # framebuffer to update but if they release the key very quickly it
+            # could be so fast that the framebuffer has not been updated yet.
+            #
+            # On a key up, block until the framebuffer has been modified from
+            # the key down.
+            if not state:
+                while os.path.getmtime("/dev/fb0") == self.pre_key_down_mtime:
+                    sleep(0.01)
 
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
