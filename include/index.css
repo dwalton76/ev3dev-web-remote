@@ -11,7 +11,7 @@ html, body {
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     
-    background-image: url('ev3.svg');
+    background-image: url('/include/ev3.svg');
     background-size: 350px auto;
     background-repeat: no-repeat;
 }
