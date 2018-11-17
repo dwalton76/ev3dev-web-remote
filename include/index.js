@@ -31,5 +31,8 @@ $(document).ready(function() {
             xhr.open('POST', '/send.key', true);
             xhr.send(e.keyCode + ',0');
         }
+
+        d = new Date();
+        $("#brick img").attr("src", "/framebuffer.png?"+d.getTime());
     });
 });

@@ -23,7 +23,7 @@ class MyHandler(SimpleHTTPRequestHandler):
         Serve a GET request
         """
 
-        if ".png" in self.path:
+        if "framebuffer.png" in self.path:
             self.send_response(200)
             call(["/usr/bin/fbgrab", "-d", "/dev/fb0", "framebuffer.png"], stderr=STDOUT)
             self.send_header('Content-type', 'image/png')
