@@ -1,4 +1,6 @@
 
+var key_is_down = false;
+
 // Prevent the page from scrolling on an iphone
 // http://stackoverflow.com/questions/7768269/ipad-safari-disable-scrolling-and-bounce-effect
 $(document).bind(
@@ -9,15 +11,22 @@ $(document).bind(
 );
 
 function keydown(keyCode) {
+
+    if (key_is_down) {
+        return;
+    }
+
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/send.key', true);
     xhr.send(keyCode + ',1');
+    key_is_down = true;
 }
 
 function keyup(keyCode) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/send.key', true);
     xhr.send(keyCode + ',0');
+    key_is_down = false;
 
 
     // Refresh the screen on keyup
