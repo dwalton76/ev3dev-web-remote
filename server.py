@@ -10,7 +10,7 @@ from time import sleep
 
 KEYBOARD = Keyboard()
 SERVER_PORT = 8080
-pre_key_down_mtime = None
+pre_key_pressed_mtime = None
 key_string = {
     8 : 'BACK',
     38 : 'UP',
@@ -56,29 +56,35 @@ class MyHandler(SimpleHTTPRequestHandler):
 
             content_len = int(self.headers.get('content-length', 0))
             content = self.rfile.read(content_len).decode('ascii')
-            jskc, state = content.split(',')
+            (jskc, pressed) = content.split(',')
             jskc = int(jskc)
-            state = int(state)
+            pressed = int(pressed)
 
-            # key down: note the timestamp of when the framebuffer was last modified
-            if state:
-                log.info("key down: {}".format(key_string.get(jskc, jskc)))
-                global pre_key_down_mtime
-                pre_key_down_mtime = os.path.getmtime("/dev/fb0")
-            else:
-                log.info("key up  : {}".format(key_string.get(jskc, jskc)))
+            if jskc in key_string:
 
-            KEYBOARD.send_key(jskc, state)
+                # key pressed, note the timestamp of when the framebuffer was last modified
+                if pressed:
+                    log.info("{} pressed".format(key_string[jskc]))
+                    global pre_key_pressed_mtime
+                    pre_key_pressed_mtime = os.path.getmtime("/dev/fb0")
+                else:
+                    log.info("{} released".format(key_string[jskc]))
 
-            # key up: when the user presses down on a key that will cause the
-            # framebuffer to update but if they release the key very quickly it
-            # could be so fast that the framebuffer has not been updated yet.
-            #
-            # On a key up, block until the framebuffer has been modified from
-            # the key down.
-            if not state:
-                while os.path.getmtime("/dev/fb0") == pre_key_down_mtime:
-                    sleep(0.01)
+                KEYBOARD.send_key(jskc, pressed)
+
+                # key released: when the user presses down on a key that will cause the
+                # framebuffer to update but if they release the key very quickly it
+                # could be so fast that the framebuffer has not been updated yet.
+                #
+                # On a key up, block until the framebuffer has been modified from
+                # the key down.
+                if not pressed:
+                    while os.path.getmtime("/dev/fb0") == pre_key_pressed_mtime:
+                        sleep(0.01)
+
+            # Unsupported key, just ignore it
+            #else:
+            #    log.info("{} IGNORED".format(jskc))
 
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -98,6 +104,6 @@ if __name__ == '__main__':
                     format="%(asctime)s %(levelname)5s: %(message)s")
     log = logging.getLogger(__name__)
 
-    print("Running on port {}".format(SERVER_PORT))
+    log.info("Running on port {}".format(SERVER_PORT))
     httpd = ThreadedHTTPServer(('', SERVER_PORT), MyHandler)
     httpd.serve_forever()
