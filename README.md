@@ -8,7 +8,7 @@ On the EV3 run `apt-get install python-evdev`.
 
 The easiest way to try it, is to clone the repo directly on the EV3:
 
-```
+```bash
 $ git clone https://github.com/G33kDude/ev3dev-web-remote.git
 $ cd ev3dev-web-remote
 $ sudo ./server.py
